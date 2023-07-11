@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.3069224, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -789,10 +789,10 @@ RectTransform:
   m_Father: {fileID: 321540788}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.4186585, y: 0.4574773}
-  m_AnchorMax: {x: 0.5827887, y: 0.5463182}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.25845867, y: 0.30543932}
+  m_AnchorMax: {x: 0.74454135, y: 0.6714875}
+  m_AnchoredPosition: {x: -1.4999084, y: -0.29240417}
+  m_SizeDelta: {x: -1.7199097, y: 6.711197}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1391511907
 GameObject:
@@ -823,10 +823,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2ba6caaf51aac4f83a748d265207e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hunger: 0
-  fun: 0
-  hygiene: 0
-  energy: 0
   hungerText: {fileID: 1234007913}
   funText: {fileID: 1032273608}
   hygieneText: {fileID: 1825173119}

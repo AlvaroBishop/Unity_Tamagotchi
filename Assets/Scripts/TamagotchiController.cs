@@ -10,7 +10,6 @@ public class TamagotchiController : MonoBehaviour
     private float hygiene = 100f;    // Higiene
     private float energy = 100f;     // Energía
 
-
     // Objetos de texto para mostrar los valores
     public Text hungerText;
     public Text funText;
@@ -27,7 +26,27 @@ public class TamagotchiController : MonoBehaviour
     private void Start()
     {
         // Inicializar los conjuntos difusos y las reglas difusas
+        InitializeFuzzySets();
+        InitializeFuzzyRules();
 
+        // Actualizar los objetos de texto con los valores iniciales
+        UpdateParameterTexts();
+    }
+
+    private void Update()
+    {
+        // Evaluación difusa del estado de ánimo
+        float mood = EvaluateMood();
+
+        // Actualizar el objeto de texto del estado de ánimo
+        UpdateMoodText(mood);
+
+        // Actualizar los parámetros según el paso del tiempo
+        UpdateParameters();
+    }
+
+    private void InitializeFuzzySets()
+    {
         // Conjuntos difusos
         fuzzySets = new Dictionary<string, FuzzySet>();
 
@@ -58,50 +77,57 @@ public class TamagotchiController : MonoBehaviour
         energySet.AddMembershipFunction("AltaEnergía", new MembershipFunction(30, 40, 50, 60));
         energySet.AddMembershipFunction("MuyAltaEnergía", new MembershipFunction(50, 60, 100, 100));
         fuzzySets["Energy"] = energySet;
+    }
 
+    private void InitializeFuzzyRules()
+    {
         // Reglas difusas
         fuzzyRules = new List<FuzzyRule>();
 
         FuzzyRule rule1 = new FuzzyRule();
-        rule1.AddAntecedent(new MembershipTerm(hungerSet.GetMembership("MuchaHambre"), hunger));
+        rule1.AddAntecedent(new MembershipTerm(fuzzySets["Hunger"].GetMembership("MuchaHambre"), () => hunger));
         rule1.SetConsequent(0.9f); // Valor difuso del estado de ánimo: 0.9 (triste)
         fuzzyRules.Add(rule1);
 
         FuzzyRule rule2 = new FuzzyRule();
-        rule2.AddAntecedent(new MembershipTerm(funSet.GetMembership("PocaDiversión"),fun));
+        rule2.AddAntecedent(new MembershipTerm(fuzzySets["Fun"].GetMembership("PocaDiversión"), () => fun));
         rule2.SetConsequent(0.5f); // Valor difuso del estado de ánimo: 0.5 (neutral)
         fuzzyRules.Add(rule2);
 
         FuzzyRule rule3 = new FuzzyRule();
-        rule3.AddAntecedent(new MembershipTerm(hygieneSet.GetMembership("MalaHigiene"),hygiene));
+        rule3.AddAntecedent(new MembershipTerm(fuzzySets["Hygiene"].GetMembership("MalaHigiene"), () => hygiene));
         rule3.SetConsequent(0.7f); // Valor difuso del estado de ánimo: 0.7 (triste)
         fuzzyRules.Add(rule3);
 
         FuzzyRule rule4 = new FuzzyRule();
-        rule4.AddAntecedent(new MembershipTerm(energySet.GetMembership("BajaEnergía"),energy));
+        rule4.AddAntecedent(new MembershipTerm(fuzzySets["Energy"].GetMembership("BajaEnergía"), () => energy));
         rule4.SetConsequent(0.6f); // Valor difuso del estado de ánimo: 0.6 (neutral)
         fuzzyRules.Add(rule4);
 
-        // Actualizar los objetos de texto con los valores iniciales
-        UpdateParameterTexts();
+        // Reglas adicionales por cada conjunto difuso
+        FuzzyRule rule5 = new FuzzyRule();
+        rule5.AddAntecedent(new MembershipTerm(fuzzySets["Hunger"].GetMembership("SinHambre"), () => hunger));
+        rule5.SetConsequent(0.1f); // Valor difuso del estado de ánimo: 0.1 (muy feliz)
+        fuzzyRules.Add(rule5);
+
+        FuzzyRule rule6 = new FuzzyRule();
+        rule6.AddAntecedent(new MembershipTerm(fuzzySets["Fun"].GetMembership("MuchaDiversión"), () => fun));
+        rule6.SetConsequent(0.8f); // Valor difuso del estado de ánimo: 0.8 (feliz)
+        fuzzyRules.Add(rule6);
+
+        FuzzyRule rule7 = new FuzzyRule();
+        rule7.AddAntecedent(new MembershipTerm(fuzzySets["Hygiene"].GetMembership("ExcelenteHigiene"), () => hygiene));
+        rule7.SetConsequent(0.7f); // Valor difuso del estado de ánimo: 0.7 (triste)
+        fuzzyRules.Add(rule7);
+
+        FuzzyRule rule8 = new FuzzyRule();
+        rule8.AddAntecedent(new MembershipTerm(fuzzySets["Energy"].GetMembership("AltaEnergía"), () => energy));
+        rule8.SetConsequent(0.9f); // Valor difuso del estado de ánimo: 0.9 (triste)
+        fuzzyRules.Add(rule8);
     }
 
-    private void Update()
-    {
-
-        // Evaluación difusa del estado de ánimo
-        float mood = EvaluateMood();
-
-        // Actualizar el objeto de texto del estado de ánimo
-        UpdateMoodText(mood);
-        
-        // Actualizar los parámetros según el paso del tiempo
-        UpdateParameters();
-    }
-    
     private void UpdateParameters()
     {
-        
         // Actualizar los parámetros en función del tiempo transcurrido
         float deltaTime = Time.deltaTime;
 
@@ -122,16 +148,13 @@ public class TamagotchiController : MonoBehaviour
         fun = Mathf.Clamp(fun, 0f, 100f);
         hygiene = Mathf.Clamp(hygiene, 0f, 100f);
         energy = Mathf.Clamp(energy, 0f, 100f);
-        
 
         // Actualizar los objetos de texto con los nuevos valores
         UpdateParameterTexts();
     }
 
-
     private void UpdateParameterTexts()
     {
-
         // Actualizar los objetos de texto con los valores de los parámetros
         hungerText.text = "Hambre: " + hunger.ToString();
         funText.text = "Diversión: " + fun.ToString();
@@ -141,17 +164,57 @@ public class TamagotchiController : MonoBehaviour
 
     private void UpdateMoodText(float mood)
     {
-        // Actualizar el objeto de texto del estado de ánimo
-        string moodString;
+        // Obtener los nombres de los conjuntos difusos
+        string hungerSetName = "Hunger";
+        string funSetName = "Fun";
+        string hygieneSetName = "Hygiene";
+        string energySetName = "Energy";
 
-        if (mood < 0.3f)
-            moodString = "Triste";
-        else if (mood < 0.6f)
-            moodString = "Neutral";
+        // Obtener los nombres de los conjuntos difusos activos según los valores de los parámetros
+        List<string> activeSets = new List<string>();
+        if (fuzzySets[hungerSetName].GetMembership("MuchaHambre").CalculateMembership(hunger) > 0.5f)
+            activeSets.Add("Tiene mucha hambre");
+        if (fuzzySets[funSetName].GetMembership("PocaDiversión").CalculateMembership(fun) > 0.5f)
+            activeSets.Add("Se divierte poco");
+        if (fuzzySets[hygieneSetName].GetMembership("MalaHigiene").CalculateMembership(hygiene) > 0.5f)
+            activeSets.Add("Tiene mala higiene");
+        if (fuzzySets[energySetName].GetMembership("BajaEnergía").CalculateMembership(energy) > 0.5f)
+            activeSets.Add("Tiene baja energía");
+
+        // Determinar la tristeza y felicidad en función del estado de ánimo difuso
+        float sadness = 1f - mood;
+        float happiness = mood;
+
+        // Construir el texto del estado de ánimo
+        string text = "Estado de ánimo: ";
+        if (activeSets.Count == 0)
+        {
+            text += "Neutral";
+        }
         else
-            moodString = "Feliz";
+        {
+            text += string.Join(", ", activeSets.ToArray());
+        }
+        text += "\n";
 
-        moodText.text = "Estado de ánimo: " + moodString;
+        // Textos variados basados en las reglas difusas
+        if (mood < 0.3f)
+            text += "Está triste";
+        else if (mood > 0.7f)
+            text += "Está muy feliz";
+        else if (happiness > sadness)
+            text += "Se siente más feliz que triste";
+        else if (happiness < sadness)
+            text += "Se siente más triste que feliz";
+        else
+            text += "Se siente igual de feliz y triste";
+
+        text += "\n";
+        text += "Tristeza: " + sadness.ToString("0.00") + "\n";
+        text += "Felicidad: " + happiness.ToString("0.00");
+
+        // Actualizar el objeto de texto del estado de ánimo
+        moodText.text = text;
     }
 
     private float EvaluateMood()
@@ -161,20 +224,17 @@ public class TamagotchiController : MonoBehaviour
 
         foreach (FuzzyRule rule in fuzzyRules)
         {
-            Debug.Log($"rule: {rule}");
             float ruleResult = 1f;
 
             foreach (IMembershipTerm antecedent in rule.antecedents)
             {
-                Debug.Log($"antecedent: {antecedent.GetMembership()}");
                 float membership = antecedent.GetMembership();
-                ruleResult = Mathf.Min(ruleResult, membership);Debug.Log(rule);
+                ruleResult = Mathf.Min(ruleResult, membership);
             }
 
             result = Mathf.Max(result, ruleResult * rule.consequent);
         }
 
-        
         return result;
     }
 }
@@ -261,19 +321,17 @@ public interface IMembershipTerm
 public class MembershipTerm : IMembershipTerm
 {
     private MembershipFunction membershipFunction;
-    private float parameterValue;
+    private System.Func<float> parameterValueFunction;
 
-    public MembershipTerm(MembershipFunction membershipFunction, float parameterValue)
+    public MembershipTerm(MembershipFunction membershipFunction, System.Func<float> parameterValueFunction)
     {
-        Debug.Log("Membership");
         this.membershipFunction = membershipFunction;
-        this.parameterValue = parameterValue;
+        this.parameterValueFunction = parameterValueFunction;
     }
 
     public float GetMembership()
     {
-        Debug.Log("Get MemberShip");
+        float parameterValue = parameterValueFunction();
         return membershipFunction.CalculateMembership(parameterValue);
     }
 }
-
