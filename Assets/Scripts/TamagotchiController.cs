@@ -166,10 +166,10 @@ public class TamagotchiController : MonoBehaviour
     private void UpdateParameterTexts()
     {
         // Actualizar los objetos de texto con los valores de los parámetros
-        hungerText.text = "Hambre: " + hunger.ToString();
-        funText.text = "Diversión: " + fun.ToString();
-        hygieneText.text = "Higiene: " + hygiene.ToString();
-        energyText.text = "Energía: " + energy.ToString();
+        hungerText.text = "Hambre: " + ((int)hunger).ToString();
+        funText.text = "Diversión: " + ((int)fun).ToString();
+        hygieneText.text = "Higiene: " + ((int)hygiene).ToString();
+        energyText.text = "Energía: " + ((int)energy).ToString();
     }
 
     private void UpdateMoodText(float mood)
@@ -263,6 +263,25 @@ public class TamagotchiController : MonoBehaviour
         }
 
         return result;
+    }
+
+    public void AddState(int decision) // 1 -> Fun & Energy 2 -> Hunger 3 -> Hygiene
+    {
+        switch(decision)
+        {
+            case 1:
+                fun += 10;
+                energy += Random.Range(-10,20);
+                break;
+            case 2:
+                hunger += 50;
+                break;
+            case 3:
+                hygiene += 20;
+                break;
+            default:
+                break;
+        }
     }
 }
 
