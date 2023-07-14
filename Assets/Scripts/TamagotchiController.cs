@@ -17,6 +17,13 @@ public class TamagotchiController : MonoBehaviour
     public Text energyText;
     public Text moodText;
 
+    // Imágenes para representar los estados de ánimo
+    public Sprite neutralMoodSprite;
+    public Sprite happyMoodSprite;
+    public Sprite sadMoodSprite;
+
+    // Componente de imagen para mostrar el estado de ánimo
+    public Image moodImage;
     // Conjuntos difusos para cada parámetro
     private Dictionary<string, FuzzySet> fuzzySets;
 
@@ -40,6 +47,9 @@ public class TamagotchiController : MonoBehaviour
 
         // Actualizar el objeto de texto del estado de ánimo
         UpdateMoodText(mood);
+
+        // Actualizar las imágenes de los estados de ánimo
+        UpdateMoodImage(mood);
 
         // Actualizar los parámetros según el paso del tiempo
         UpdateParameters();
@@ -216,6 +226,23 @@ public class TamagotchiController : MonoBehaviour
         // Actualizar el objeto de texto del estado de ánimo
         moodText.text = text;
     }
+
+    private void UpdateMoodImage(float mood)
+    {
+        if (mood < 0.3f)
+        {
+            moodImage.sprite = sadMoodSprite;
+        }
+        else if (mood > 0.7f)
+        {
+            moodImage.sprite = happyMoodSprite;
+        }
+        else
+        {
+            moodImage.sprite = neutralMoodSprite;
+        }
+    }
+
 
     private float EvaluateMood()
     {
